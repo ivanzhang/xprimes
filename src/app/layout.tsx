@@ -13,7 +13,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      {/* 中文注释：保留最小站点标识，便于测试与后续基础壳层扩展。 */}
+      <body data-site="xprimes">{children}</body>
     </html>
   );
 }
