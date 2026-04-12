@@ -43,6 +43,7 @@ describe("admin-access", () => {
 
   it("可通过主接口判断邮箱是否在白名单中", () => {
     expect(isAllowedAdminEmail("amy@xprimes.cn")).toBe(true);
+    expect(isAllowedAdminEmail("  AMY@XPRIMES.CN ")).toBe(true);
     expect(isAllowedAdminEmail("guest@xprimes.cn")).toBe(false);
     expect(isAllowedAdminEmail(undefined)).toBe(false);
   });

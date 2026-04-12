@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS logs (
   content TEXT NOT NULL,
   excerpt_en TEXT,
   published_at TEXT NOT NULL,
-  is_pinned INTEGER NOT NULL DEFAULT 0,
+  is_pinned INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1)),
   author_email TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP

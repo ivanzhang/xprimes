@@ -12,6 +12,15 @@ export interface AdminIdentity {
 // 中文注释：使用 Set 提升命中判断效率，避免每次线性遍历。
 const ADMIN_ALLOWLIST_SET = new Set<string>(ADMIN_ALLOWLIST);
 
+function normalizeEmail(email: string | null | undefined): string | null {
+  if (!email) {
+    return null;
+  }
+
+  const normalized = email.trim().toLowerCase();
+  return normalized.length > 0 ? normalized : null;
+}
+
 /**
  * 中文注释：从 Cloudflare Access 请求头提取并标准化邮箱。
  * 使用示例：
@@ -21,13 +30,7 @@ const ADMIN_ALLOWLIST_SET = new Set<string>(ADMIN_ALLOWLIST);
  * ```
  */
 export function getAuthenticatedEmail(request: Request): string | null {
-  const rawEmail = request.headers.get(ACCESS_EMAIL_HEADER);
-  if (!rawEmail) {
-    return null;
-  }
-
-  const normalized = rawEmail.trim().toLowerCase();
-  return normalized.length > 0 ? normalized : null;
+  return normalizeEmail(request.headers.get(ACCESS_EMAIL_HEADER));
 }
 
 /**
@@ -39,12 +42,18 @@ export function getAuthenticatedEmail(request: Request): string | null {
  * }
  * ```
  */
-export function isAllowedAdminEmail(email: string | null | undefined): email is AdminEmail {
-  if (!email) {
-    return false;
+export function isAllowedAdminEmail(email: string | null | undefined): boolean {
+  const normalized = normalizeEmail(email);
+  return normalized !== null && ADMIN_ALLOWLIST_SET.has(normalized);
+}
+
+function getAllowedAdminEmail(email: string | null | undefined): AdminEmail | null {
+  const normalized = normalizeEmail(email);
+  if (!normalized || !ADMIN_ALLOWLIST_SET.has(normalized)) {
+    return null;
   }
 
-  return ADMIN_ALLOWLIST_SET.has(email.trim().toLowerCase());
+  return normalized as AdminEmail;
 }
 
 /**
@@ -56,8 +65,8 @@ export function isAllowedAdminEmail(email: string | null | undefined): email is 
  * ```
  */
 export function getAdminIdentity(request: Request): AdminIdentity | null {
-  const email = getAuthenticatedEmail(request);
-  if (!isAllowedAdminEmail(email)) {
+  const email = getAllowedAdminEmail(getAuthenticatedEmail(request));
+  if (!email) {
     return null;
   }
 

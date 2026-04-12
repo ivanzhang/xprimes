@@ -1,10 +1,11 @@
-export interface CloudflareBindings {
+export type CloudflareBindings = CloudflareEnv & {
   DB?: D1Database;
   ASSETS?: Fetcher;
   R2?: R2Bucket;
   ENVIRONMENT?: string;
+  NODE_ENV?: string;
   [key: string]: unknown;
-}
+};
 
 export interface CloudflareRuntimeContext {
   env: CloudflareBindings;

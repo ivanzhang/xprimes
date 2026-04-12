@@ -100,6 +100,7 @@ describe("db/schema", () => {
     expect(sql).toContain("question_body");
     expect(sql).toContain("payload_snapshot");
     expect(sql).toContain("published_at TEXT NOT NULL");
+    expect(sql).toContain("is_pinned INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1))");
     expect(sql).toContain("version TEXT NOT NULL UNIQUE");
     expect(sql).toContain("title_en TEXT NOT NULL");
     expect(sql).toContain("abstract_zh TEXT NOT NULL");
