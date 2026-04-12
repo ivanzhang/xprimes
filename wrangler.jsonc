@@ -1,0 +1,12 @@
+{
+  // 中文注释：最小 Worker 配置，后续可在此追加 D1/R2 绑定。
+  // 中文注释：使用示例：`npm run preview` 可本地预览 Worker 构建结果。
+  "name": "xprimes-site",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-04-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}
