@@ -1,12 +1,14 @@
 {
-  // 中文注释：最小 Worker 配置，后续可在此追加 D1/R2 绑定。
-  // 中文注释：使用示例：`npm run preview` 可本地预览 Worker 构建结果。
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // 中文注释：最小可运行的 Worker 入口，后续 OpenNext 构建产物会输出到这里。
   "name": "xprimes-site",
   "main": ".open-next/worker.js",
+  // 中文注释：按官方建议使用当天日期，且不低于 2024-09-23。
   "compatibility_date": "2026-04-12",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  // 中文注释：后续如需扩展，可继续添加 vars、d1_databases、r2_buckets 等绑定。
 }

@@ -1,4 +1,4 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-// 中文注释：这里先保持最小骨架，后续任务再扩展缓存、资源与绑定策略。
-export default defineCloudflareConfig({});
+// 中文注释：Task 1 仅保留最小骨架，后续可在这里追加缓存与绑定扩展。
+export default defineCloudflareConfig();
