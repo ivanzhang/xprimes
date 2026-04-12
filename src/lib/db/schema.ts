@@ -6,6 +6,10 @@ export const REVIEW_ITEM_STATUSES = ["draft", "published"] as const;
 
 export type ReviewItemStatus = (typeof REVIEW_ITEM_STATUSES)[number];
 
+export const REVIEW_ITEM_TYPES = ["open", "resolved"] as const;
+
+export type ReviewItemType = (typeof REVIEW_ITEM_TYPES)[number];
+
 export const PAPER_STATUSES = ["draft", "published"] as const;
 
 export type PaperStatus = (typeof PAPER_STATUSES)[number];
@@ -42,7 +46,7 @@ export interface PaperRow {
 export interface ReviewItemRow {
   id: string;
   code: string;
-  item_type: string;
+  item_type: ReviewItemType;
   title: string;
   reference: string;
   question_body: string;

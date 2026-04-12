@@ -4,6 +4,7 @@ import {
   DB_TABLES,
   PAPER_STATUSES,
   REVIEW_ITEM_STATUSES,
+  REVIEW_ITEM_TYPES,
   type ActivityLogRow,
   type LogRow,
   type PaperRow,
@@ -17,6 +18,10 @@ describe("db/schema", () => {
 
   it("定义 review_items 的状态集合", () => {
     expect(REVIEW_ITEM_STATUSES).toEqual(["draft", "published"]);
+  });
+
+  it("定义 review_items 的类型集合", () => {
+    expect(REVIEW_ITEM_TYPES).toEqual(["open", "resolved"]);
   });
 
   it("定义 papers 的状态集合", () => {
@@ -56,7 +61,7 @@ describe("db/schema", () => {
     const reviewItem: ReviewItemRow = {
       id: "review_1",
       code: "R-001",
-      item_type: "consistency",
+      item_type: "open",
       title: "术语一致性",
       reference: "章节 2.1",
       question_body: "是否统一术语定义？",
@@ -102,5 +107,7 @@ describe("db/schema", () => {
     expect(sql).toContain("reference TEXT NOT NULL");
     expect(sql).toContain("updated_by TEXT NOT NULL");
     expect(sql).toContain("payload_snapshot TEXT NOT NULL");
+    expect(sql).toContain("code TEXT NOT NULL UNIQUE");
+    expect(sql).toContain("item_type TEXT NOT NULL CHECK (item_type IN ('open', 'resolved'))");
   });
 });

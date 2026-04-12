@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS papers (
 -- 中文注释：审核条目表，支持标准问答与状态追踪。
 CREATE TABLE IF NOT EXISTS review_items (
   id TEXT PRIMARY KEY,
-  code TEXT NOT NULL,
-  item_type TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  item_type TEXT NOT NULL CHECK (item_type IN ('open', 'resolved')),
   title TEXT NOT NULL,
   reference TEXT NOT NULL,
   question_body TEXT NOT NULL,
