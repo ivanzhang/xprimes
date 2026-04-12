@@ -16,11 +16,11 @@ describe("db/schema", () => {
   });
 
   it("定义 review_items 的状态集合", () => {
-    expect(REVIEW_ITEM_STATUSES).toEqual(["pending", "approved", "rejected"]);
+    expect(REVIEW_ITEM_STATUSES).toEqual(["draft", "published"]);
   });
 
   it("定义 papers 的状态集合", () => {
-    expect(PAPER_STATUSES).toEqual(["draft", "published", "archived"]);
+    expect(PAPER_STATUSES).toEqual(["draft", "published"]);
   });
 
   it("行类型字段可被 TypeScript 识别", () => {
@@ -38,7 +38,7 @@ describe("db/schema", () => {
 
     const paper: PaperRow = {
       id: "paper_1",
-      version: 1,
+      version: "v1.0.0",
       title_zh: "中文标题",
       title_en: "English Title",
       abstract_zh: "中文摘要",
@@ -61,7 +61,7 @@ describe("db/schema", () => {
       reference: "章节 2.1",
       question_body: "是否统一术语定义？",
       response_body: "已统一",
-      status: "pending",
+      status: "draft",
       updated_by: "amy@xprimes.cn",
       created_at: "2026-04-12T00:00:00.000Z",
       updated_at: "2026-04-12T00:00:00.000Z",
@@ -73,7 +73,7 @@ describe("db/schema", () => {
       entity_id: reviewItem.id,
       action: "update",
       operator_email: "yiyi@xprimes.cn",
-      payload_snapshot: "{\"status\":\"pending\"}",
+      payload_snapshot: "{\"status\":\"draft\"}",
       created_at: "2026-04-12T00:00:00.000Z",
     };
 
@@ -94,5 +94,13 @@ describe("db/schema", () => {
     expect(sql).toContain("pdf_key");
     expect(sql).toContain("question_body");
     expect(sql).toContain("payload_snapshot");
+    expect(sql).toContain("published_at TEXT NOT NULL");
+    expect(sql).toContain("version TEXT NOT NULL UNIQUE");
+    expect(sql).toContain("title_en TEXT NOT NULL");
+    expect(sql).toContain("abstract_zh TEXT NOT NULL");
+    expect(sql).toContain("status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published'))");
+    expect(sql).toContain("reference TEXT NOT NULL");
+    expect(sql).toContain("updated_by TEXT NOT NULL");
+    expect(sql).toContain("payload_snapshot TEXT NOT NULL");
   });
 });

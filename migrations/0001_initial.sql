@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS logs (
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   excerpt_en TEXT,
-  published_at TEXT,
+  published_at TEXT NOT NULL,
   is_pinned INTEGER NOT NULL DEFAULT 0,
   author_email TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,16 +14,16 @@ CREATE TABLE IF NOT EXISTS logs (
 -- 中文注释：论文表，按计划保留中英文标题、摘要与 PDF 元数据。
 CREATE TABLE IF NOT EXISTS papers (
   id TEXT PRIMARY KEY,
-  version INTEGER NOT NULL DEFAULT 1,
+  version TEXT NOT NULL UNIQUE,
   title_zh TEXT NOT NULL,
-  title_en TEXT,
-  abstract_zh TEXT,
+  title_en TEXT NOT NULL,
+  abstract_zh TEXT NOT NULL,
   abstract_en TEXT,
   pdf_key TEXT NOT NULL,
   pdf_filename TEXT NOT NULL,
   pdf_size INTEGER NOT NULL DEFAULT 0,
   publish_date TEXT,
-  status TEXT NOT NULL DEFAULT 'draft',
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
   author_email TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS review_items (
   code TEXT NOT NULL,
   item_type TEXT NOT NULL,
   title TEXT NOT NULL,
-  reference TEXT,
+  reference TEXT NOT NULL,
   question_body TEXT NOT NULL,
   response_body TEXT,
-  status TEXT NOT NULL DEFAULT 'pending',
-  updated_by TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  updated_by TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -51,6 +51,6 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   entity_id TEXT NOT NULL,
   action TEXT NOT NULL,
   operator_email TEXT NOT NULL,
-  payload_snapshot TEXT,
+  payload_snapshot TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

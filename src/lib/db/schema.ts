@@ -2,11 +2,11 @@ export const DB_TABLES = ["logs", "papers", "review_items", "activity_logs"] as 
 
 export type DbTableName = (typeof DB_TABLES)[number];
 
-export const REVIEW_ITEM_STATUSES = ["pending", "approved", "rejected"] as const;
+export const REVIEW_ITEM_STATUSES = ["draft", "published"] as const;
 
 export type ReviewItemStatus = (typeof REVIEW_ITEM_STATUSES)[number];
 
-export const PAPER_STATUSES = ["draft", "published", "archived"] as const;
+export const PAPER_STATUSES = ["draft", "published"] as const;
 
 export type PaperStatus = (typeof PAPER_STATUSES)[number];
 
@@ -15,7 +15,7 @@ export interface LogRow {
   title: string;
   content: string;
   excerpt_en: string | null;
-  published_at: string | null;
+  published_at: string;
   is_pinned: 0 | 1;
   author_email: string;
   created_at: string;
@@ -24,10 +24,10 @@ export interface LogRow {
 
 export interface PaperRow {
   id: string;
-  version: number;
+  version: string;
   title_zh: string;
-  title_en: string | null;
-  abstract_zh: string | null;
+  title_en: string;
+  abstract_zh: string;
   abstract_en: string | null;
   pdf_key: string;
   pdf_filename: string;
@@ -44,11 +44,11 @@ export interface ReviewItemRow {
   code: string;
   item_type: string;
   title: string;
-  reference: string | null;
+  reference: string;
   question_body: string;
   response_body: string | null;
   status: ReviewItemStatus;
-  updated_by: string | null;
+  updated_by: string;
   created_at: string;
   updated_at: string;
 }
@@ -59,7 +59,7 @@ export interface ActivityLogRow {
   entity_id: string;
   action: string;
   operator_email: string;
-  payload_snapshot: string | null;
+  payload_snapshot: string;
   created_at: string;
 }
 
