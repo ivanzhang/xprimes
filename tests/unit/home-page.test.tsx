@@ -1,4 +1,6 @@
 import { render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
+import RootLayout from "@/app/layout";
 import HomePage from "@/app/page";
 
 describe("HomePage", () => {
@@ -11,5 +13,16 @@ describe("HomePage", () => {
         name: "amy@xprimes.cn",
       }),
     ).toHaveAttribute("href", "mailto:amy@xprimes.cn");
+  });
+
+  it("根布局输出最小站点标识", () => {
+    const markup = renderToStaticMarkup(
+      <RootLayout>
+        <HomePage />
+      </RootLayout>,
+    );
+
+    expect(markup).toContain('lang="zh-CN"');
+    expect(markup).toContain('data-site="xprimes"');
   });
 });
