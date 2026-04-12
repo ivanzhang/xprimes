@@ -12,40 +12,55 @@ export type PaperStatus = (typeof PAPER_STATUSES)[number];
 
 export interface LogRow {
   id: string;
+  title: string;
+  content: string;
+  excerpt_en: string | null;
+  published_at: string | null;
+  is_pinned: 0 | 1;
+  author_email: string;
   created_at: string;
-  level: "debug" | "info" | "warn" | "error";
-  message: string;
-  metadata_json: string | null;
+  updated_at: string;
 }
 
 export interface PaperRow {
   id: string;
+  version: number;
+  title_zh: string;
+  title_en: string | null;
+  abstract_zh: string | null;
+  abstract_en: string | null;
+  pdf_key: string;
+  pdf_filename: string;
+  pdf_size: number;
+  publish_date: string | null;
+  status: PaperStatus;
+  author_email: string;
   created_at: string;
   updated_at: string;
-  title: string;
-  source_url: string | null;
-  summary: string | null;
-  status: PaperStatus;
 }
 
 export interface ReviewItemRow {
   id: string;
-  paper_id: string;
+  code: string;
+  item_type: string;
+  title: string;
+  reference: string | null;
+  question_body: string;
+  response_body: string | null;
+  status: ReviewItemStatus;
+  updated_by: string | null;
   created_at: string;
   updated_at: string;
-  reviewer_email: string;
-  status: ReviewItemStatus;
-  note: string | null;
 }
 
 export interface ActivityLogRow {
   id: string;
-  created_at: string;
-  actor_email: string;
+  entity_type: string;
+  entity_id: string;
   action: string;
-  target_type: string;
-  target_id: string;
-  payload_json: string | null;
+  operator_email: string;
+  payload_snapshot: string | null;
+  created_at: string;
 }
 
 /**

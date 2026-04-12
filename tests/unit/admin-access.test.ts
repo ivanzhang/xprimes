@@ -1,7 +1,8 @@
 import {
   ADMIN_ALLOWLIST,
+  getAdminIdentity,
   getAuthenticatedEmail,
-  getAdminFromRequest,
+  isAllowedAdminEmail,
   requireAdmin,
 } from "@/lib/auth/admin-access";
 
@@ -27,7 +28,7 @@ describe("admin-access", () => {
       },
     });
 
-    expect(getAdminFromRequest(request)).toEqual({ email: "yiyi@xprimes.cn" });
+    expect(getAdminIdentity(request)).toEqual({ email: "yiyi@xprimes.cn" });
   });
 
   it("非白名单返回 null", () => {
@@ -37,7 +38,13 @@ describe("admin-access", () => {
       },
     });
 
-    expect(getAdminFromRequest(request)).toBeNull();
+    expect(getAdminIdentity(request)).toBeNull();
+  });
+
+  it("可通过主接口判断邮箱是否在白名单中", () => {
+    expect(isAllowedAdminEmail("amy@xprimes.cn")).toBe(true);
+    expect(isAllowedAdminEmail("guest@xprimes.cn")).toBe(false);
+    expect(isAllowedAdminEmail(undefined)).toBe(false);
   });
 
   it("严格方法在未命中白名单时抛错", () => {
@@ -54,6 +61,6 @@ describe("admin-access", () => {
     const request = new Request("https://xprimes.cn/admin");
 
     expect(getAuthenticatedEmail(request)).toBeNull();
-    expect(getAdminFromRequest(request)).toBeNull();
+    expect(getAdminIdentity(request)).toBeNull();
   });
 });

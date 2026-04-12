@@ -31,21 +31,38 @@ export function getAuthenticatedEmail(request: Request): string | null {
 }
 
 /**
- * 中文注释：宽松模式，非管理员返回 null，适合可选鉴权场景。
+ * 中文注释：主接口，判断邮箱是否属于后台白名单。
  * 使用示例：
  * ```ts
- * const admin = getAdminFromRequest(request);
+ * if (isAllowedAdminEmail("amy@xprimes.cn")) {
+ *   console.log("允许访问后台");
+ * }
+ * ```
+ */
+export function isAllowedAdminEmail(email: string | null | undefined): email is AdminEmail {
+  if (!email) {
+    return false;
+  }
+
+  return ADMIN_ALLOWLIST_SET.has(email.trim().toLowerCase());
+}
+
+/**
+ * 中文注释：主接口，从请求中解析管理员身份，非管理员返回 null。
+ * 使用示例：
+ * ```ts
+ * const admin = getAdminIdentity(request);
  * if (!admin) return new Response("forbidden", { status: 403 });
  * ```
  */
-export function getAdminFromRequest(request: Request): AdminIdentity | null {
+export function getAdminIdentity(request: Request): AdminIdentity | null {
   const email = getAuthenticatedEmail(request);
-  if (!email || !ADMIN_ALLOWLIST_SET.has(email)) {
+  if (!isAllowedAdminEmail(email)) {
     return null;
   }
 
   return {
-    email: email as AdminEmail,
+    email,
   };
 }
 
@@ -58,7 +75,7 @@ export function getAdminFromRequest(request: Request): AdminIdentity | null {
  * ```
  */
 export function requireAdmin(request: Request): AdminIdentity {
-  const admin = getAdminFromRequest(request);
+  const admin = getAdminIdentity(request);
   if (!admin) {
     throw new Error("UNAUTHORIZED_ADMIN");
   }
