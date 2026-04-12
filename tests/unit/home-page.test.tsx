@@ -6,6 +6,10 @@ describe("HomePage", () => {
     render(<HomePage />);
 
     expect(screen.getByRole("heading", { name: "XPrimes" })).toBeInTheDocument();
-    expect(screen.getByText("amy@xprimes.cn")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "amy@xprimes.cn",
+      }),
+    ).toHaveAttribute("href", "mailto:amy@xprimes.cn");
   });
 });
