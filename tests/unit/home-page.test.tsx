@@ -4,10 +4,12 @@ import RootLayout from "@/app/layout";
 import HomePage from "@/app/page";
 
 describe("HomePage", () => {
-  it("显示 XPrimes 标题和联系邮箱", () => {
+  it("显示带语义标识的首页标题和联系邮箱", () => {
     render(<HomePage />);
 
-    expect(screen.getByRole("heading", { name: "XPrimes" })).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveAttribute("aria-labelledby", "home-title");
+    expect(screen.getByRole("heading", { name: "XPrimes" })).toHaveAttribute("id", "home-title");
+    expect(screen.getByText("主联系邮箱：")).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
         name: "amy@xprimes.cn",
