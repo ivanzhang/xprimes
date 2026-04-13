@@ -42,6 +42,10 @@ describe("admin layout", () => {
       }),
     );
 
+    expect(screen.getByTestId("admin-empty-state")).toHaveAttribute(
+      "data-admin-empty-state",
+      "true",
+    );
     expect(screen.getByRole("heading", { name: "后台访问受限" })).toBeInTheDocument();
     expect(screen.getByText("需要使用管理员邮箱完成 Access 登录后才能进入后台。"))
       .toBeInTheDocument();
@@ -63,6 +67,7 @@ describe("admin layout", () => {
 
     expect(screen.getByRole("heading", { name: "内容后台" })).toBeInTheDocument();
     expect(screen.getByText("当前管理员：yiyi@xprimes.cn")).toBeInTheDocument();
+    expect(screen.getByLabelText("后台功能入口")).toBeInTheDocument();
 
     const nav = screen.getByRole("navigation", { name: "后台导航" });
     expect(within(nav).getByRole("link", { name: "管理首页" })).toHaveAttribute(
