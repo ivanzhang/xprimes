@@ -109,7 +109,7 @@ describe("public content", () => {
   });
 
   it("首页展示项目定位、快速入口与联系邮箱", () => {
-    render(HomePage());
+    render(await HomePage());
 
     expect(screen.getByRole("heading", { name: "XPrimes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "论文版本" })).toHaveAttribute("href", "/papers");
@@ -122,13 +122,13 @@ describe("public content", () => {
   });
 
   it("公开页面展示论文空态、日志回退内容与 Review Protocol", () => {
-    render(PapersPage());
+    render(await PapersPage());
     expect(screen.getByText("尚无公开版本")).toBeInTheDocument();
 
-    render(LogPage());
+    render(await LogPage());
     expect(screen.getByText("项目站点建立并开始留痕")).toBeInTheDocument();
 
-    render(ReviewPage());
+    render(await ReviewPage());
     expect(screen.getByRole("heading", { name: "Review Protocol" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Open Questions" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Addressed Critiques" })).toBeInTheDocument();
