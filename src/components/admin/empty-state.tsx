@@ -12,7 +12,7 @@ interface AdminEmptyStateProps {
  */
 export function AdminEmptyState({ title, description }: AdminEmptyStateProps) {
   return (
-    <section aria-live="polite">
+    <section aria-live="polite" data-admin-empty-state="true" data-testid="admin-empty-state">
       <h1>{title}</h1>
       <p>{description}</p>
     </section>

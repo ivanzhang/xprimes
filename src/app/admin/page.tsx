@@ -14,7 +14,7 @@ export default function AdminHomePage() {
     <section aria-labelledby="admin-home-title">
       <h2 id="admin-home-title">管理首页</h2>
       <p>先通过统一后台壳层进入各模块，后续表单与数据操作会在独立任务中补齐。</p>
-      <div>
+      <div aria-label="后台功能入口">
         {ADMIN_ENTRY_ITEMS.map((item) => (
           <article key={item.href}>
             <h3>{item.label}</h3>
