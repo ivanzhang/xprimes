@@ -11,6 +11,13 @@ export interface PublicLogItem {
   authorEmail: string;
 }
 
+export interface AdminLogItem extends PublicLogItem {
+  createdAt: string;
+  createdAtLabel: string;
+  updatedAt: string;
+  updatedAtLabel: string;
+}
+
 export interface PublicPaperItem {
   id: string;
   version: string;
@@ -66,6 +73,26 @@ export function mapLogRowToPublicItem(row: LogRow): PublicLogItem {
     publishedAtLabel: formatDateLabel(row.published_at),
     isPinned: row.is_pinned === 1,
     authorEmail: row.author_email,
+  };
+}
+
+/**
+ * 中文注释：后台日志列表需要额外展示创建与更新时间，便于管理员快速核对变更轨迹。
+ * 使用示例：
+ * ```ts
+ * const item = mapLogRowToAdminItem(row);
+ * console.log(item.updatedAtLabel);
+ * ```
+ */
+export function mapLogRowToAdminItem(row: LogRow): AdminLogItem {
+  const publicItem = mapLogRowToPublicItem(row);
+
+  return {
+    ...publicItem,
+    createdAt: row.created_at,
+    createdAtLabel: formatDateLabel(row.created_at),
+    updatedAt: row.updated_at,
+    updatedAtLabel: formatDateLabel(row.updated_at),
   };
 }
 
