@@ -20,13 +20,24 @@ export const FALLBACK_PAPER_ROWS: PaperRow[] = [];
 
 export const FALLBACK_REVIEW_ROWS: ReviewItemRow[] = [];
 
+export const PUBLIC_CONTENT_SOURCE_NULL_ERROR = "PUBLIC_CONTENT_SOURCE_NULL";
+
 /**
- * 中文注释：统一处理“有上游数据就用上游，没有就回退内置内容”的策略。
+ * 中文注释：仅当上游数据源尚未接入（`undefined`）时才允许回退。
+ * `null` 代表调用方已经拿到了异常态，不应被静默吞掉。
  * 使用示例：
  * ```ts
  * const rows = resolvePublicRows(customRows, FALLBACK_LOG_ROWS);
  * ```
  */
 export function resolvePublicRows<T>(rows: T[] | null | undefined, fallbackRows: T[]): T[] {
-  return rows ?? fallbackRows;
+  if (rows === undefined) {
+    return fallbackRows;
+  }
+
+  if (rows === null) {
+    throw new Error(PUBLIC_CONTENT_SOURCE_NULL_ERROR);
+  }
+
+  return rows;
 }

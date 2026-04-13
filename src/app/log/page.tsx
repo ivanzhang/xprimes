@@ -2,6 +2,9 @@ import { LogList } from "@/components/site/log-list";
 import { SectionHeading } from "@/components/site/section-heading";
 import { listPublicLogs } from "@/lib/repositories/log-repository";
 
+// 中文注释：动态日志需要较快反映新发布内容，因此使用显式 revalidate。
+export const revalidate = 60;
+
 export default function LogPage() {
   const logs = listPublicLogs();
 

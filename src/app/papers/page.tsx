@@ -2,6 +2,9 @@ import { PaperList } from "@/components/site/paper-list";
 import { SectionHeading } from "@/components/site/section-heading";
 import { listPublishedPapers } from "@/lib/repositories/paper-repository";
 
+// 中文注释：显式声明 ISR 周期，避免前台长期停留在构建时快照。
+export const revalidate = 60;
+
 export default function PapersPage() {
   const papers = listPublishedPapers();
 

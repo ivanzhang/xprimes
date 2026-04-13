@@ -4,6 +4,9 @@ import { listPublicLogs } from "@/lib/repositories/log-repository";
 import { listPublishedPapers } from "@/lib/repositories/paper-repository";
 import { listPublishedReviewSections } from "@/lib/repositories/review-repository";
 
+// 中文注释：公开页每分钟重新验证一次，后续接入 D1 后能较快反映发布内容。
+export const revalidate = 60;
+
 export default function HomePage() {
   const latestLogs = listPublicLogs().slice(0, 2);
   const papers = listPublishedPapers();

@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import HomePage from "@/app/page";
-import LogPage from "@/app/log/page";
-import PapersPage from "@/app/papers/page";
-import ReviewPage from "@/app/review/page";
+import HomePage, { revalidate as homePageRevalidate } from "@/app/page";
+import LogPage, { revalidate as logPageRevalidate } from "@/app/log/page";
+import PapersPage, { revalidate as papersPageRevalidate } from "@/app/papers/page";
+import ReviewPage, { revalidate as reviewPageRevalidate } from "@/app/review/page";
 import {
   mapPaperRowToPublicItem,
   mapReviewRowsToSections,
@@ -93,6 +93,19 @@ describe("public content", () => {
       openItems: [],
       resolvedItems: [],
     });
+  });
+
+  it("仅在未接数据源时使用 fallback，null 视为错误输入", () => {
+    expect(() => listPublicLogs(null)).toThrowError("PUBLIC_CONTENT_SOURCE_NULL");
+    expect(() => listPublishedPapers(null)).toThrowError("PUBLIC_CONTENT_SOURCE_NULL");
+    expect(() => listPublishedReviewSections(null)).toThrowError("PUBLIC_CONTENT_SOURCE_NULL");
+  });
+
+  it("四个公开页面声明统一的数据新鲜度策略", () => {
+    expect(homePageRevalidate).toBe(60);
+    expect(papersPageRevalidate).toBe(60);
+    expect(logPageRevalidate).toBe(60);
+    expect(reviewPageRevalidate).toBe(60);
   });
 
   it("首页展示项目定位、快速入口与联系邮箱", () => {

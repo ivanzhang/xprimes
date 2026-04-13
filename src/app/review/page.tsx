@@ -3,6 +3,9 @@ import { ReviewList } from "@/components/site/review-list";
 import { SectionHeading } from "@/components/site/section-heading";
 import { listPublishedReviewSections } from "@/lib/repositories/review-repository";
 
+// 中文注释：反质疑页面同样按分钟级刷新，便于后续后台发布后及时生效。
+export const revalidate = 60;
+
 const REVIEW_PROTOCOL = [
   "Each critique should reference a specific definition, lemma, or theorem.",
   "Ambiguous or non-specific objections will not be tracked.",
