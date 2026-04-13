@@ -9,6 +9,10 @@ export interface AdminIdentity {
   email: AdminEmail;
 }
 
+export interface HeadersLike {
+  get(name: string): string | null;
+}
+
 // 中文注释：使用 Set 提升命中判断效率，避免每次线性遍历。
 const ADMIN_ALLOWLIST_SET = new Set<string>(ADMIN_ALLOWLIST);
 
@@ -22,6 +26,17 @@ function normalizeEmail(email: string | null | undefined): string | null {
 }
 
 /**
+ * 中文注释：从任意兼容 Headers 的对象提取 Access 邮箱，便于在 Next `headers()` 场景复用。
+ * 使用示例：
+ * ```ts
+ * const email = getAuthenticatedEmailFromHeaders(headers());
+ * ```
+ */
+export function getAuthenticatedEmailFromHeaders(headersLike: HeadersLike): string | null {
+  return normalizeEmail(headersLike.get(ACCESS_EMAIL_HEADER));
+}
+
+/**
  * 中文注释：从 Cloudflare Access 请求头提取并标准化邮箱。
  * 使用示例：
  * ```ts
@@ -30,7 +45,7 @@ function normalizeEmail(email: string | null | undefined): string | null {
  * ```
  */
 export function getAuthenticatedEmail(request: Request): string | null {
-  return normalizeEmail(request.headers.get(ACCESS_EMAIL_HEADER));
+  return getAuthenticatedEmailFromHeaders(request.headers);
 }
 
 /**
@@ -57,6 +72,24 @@ function getAllowedAdminEmail(email: string | null | undefined): AdminEmail | nu
 }
 
 /**
+ * 中文注释：从请求头对象解析管理员身份，适合在 App Router Layout 中做服务端守卫。
+ * 使用示例：
+ * ```ts
+ * const admin = getAdminIdentityFromHeaders(await headers());
+ * ```
+ */
+export function getAdminIdentityFromHeaders(headersLike: HeadersLike): AdminIdentity | null {
+  const email = getAllowedAdminEmail(getAuthenticatedEmailFromHeaders(headersLike));
+  if (!email) {
+    return null;
+  }
+
+  return {
+    email,
+  };
+}
+
+/**
  * 中文注释：主接口，从请求中解析管理员身份，非管理员返回 null。
  * 使用示例：
  * ```ts
@@ -65,14 +98,27 @@ function getAllowedAdminEmail(email: string | null | undefined): AdminEmail | nu
  * ```
  */
 export function getAdminIdentity(request: Request): AdminIdentity | null {
-  const email = getAllowedAdminEmail(getAuthenticatedEmail(request));
-  if (!email) {
-    return null;
+  return getAdminIdentityFromHeaders(request.headers);
+}
+
+/**
+ * 中文注释：严格解析管理员身份，可接收 Request 或 `headers()` 返回值。
+ * 使用示例：
+ * ```ts
+ * const admin = requireAdminIdentity(await headers());
+ * ```
+ */
+export function requireAdminIdentity(requestOrHeadersLike: Request | HeadersLike): AdminIdentity {
+  const headersLike = requestOrHeadersLike instanceof Request
+    ? requestOrHeadersLike.headers
+    : requestOrHeadersLike;
+  const admin = getAdminIdentityFromHeaders(headersLike);
+
+  if (!admin) {
+    throw new Error("UNAUTHORIZED_ADMIN");
   }
 
-  return {
-    email,
-  };
+  return admin;
 }
 
 /**
@@ -84,10 +130,5 @@ export function getAdminIdentity(request: Request): AdminIdentity | null {
  * ```
  */
 export function requireAdmin(request: Request): AdminIdentity {
-  const admin = getAdminIdentity(request);
-  if (!admin) {
-    throw new Error("UNAUTHORIZED_ADMIN");
-  }
-
-  return admin;
+  return requireAdminIdentity(request);
 }
