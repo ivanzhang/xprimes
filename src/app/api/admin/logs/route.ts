@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { requireAdminIdentity } from "@/lib/auth/admin-access";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
@@ -43,6 +44,11 @@ function createErrorResponse(error: unknown): Response {
   return Response.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
 }
 
+function revalidatePublicLogPages(): void {
+  revalidatePath("/");
+  revalidatePath("/log");
+}
+
 /**
  * 中文注释：日志没有草稿态，后台创建成功后立即可被前台 `/log` 与首页最近动态读取。
  * 使用示例：
@@ -73,6 +79,7 @@ export async function POST(request: Request): Promise<Response> {
       operatorEmail: identity.email,
       payloadSnapshot: created,
     });
+    revalidatePublicLogPages();
 
     return Response.json({ ok: true, item: created }, { status: 201 });
   } catch (error) {

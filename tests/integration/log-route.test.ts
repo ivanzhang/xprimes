@@ -12,6 +12,10 @@ const { requireCloudflareRuntimeContextMock } = vi.hoisted(() => ({
   requireCloudflareRuntimeContextMock: vi.fn(),
 }));
 
+const { revalidatePathMock } = vi.hoisted(() => ({
+  revalidatePathMock: vi.fn(),
+}));
+
 vi.mock("@/lib/cloudflare/context", async () => {
   const actual = await vi.importActual<typeof import("@/lib/cloudflare/context")>(
     "@/lib/cloudflare/context",
@@ -22,6 +26,10 @@ vi.mock("@/lib/cloudflare/context", async () => {
     requireCloudflareRuntimeContext: requireCloudflareRuntimeContextMock,
   };
 });
+
+vi.mock("next/cache", () => ({
+  revalidatePath: revalidatePathMock,
+}));
 
 import { DELETE, PATCH } from "@/app/api/admin/logs/[id]/route";
 import { POST } from "@/app/api/admin/logs/route";
@@ -194,6 +202,7 @@ function createFakeD1Database(initialState?: Partial<FakeDbState>): FakeDb {
 describe("admin log routes", () => {
   beforeEach(() => {
     requireCloudflareRuntimeContextMock.mockReset();
+    revalidatePathMock.mockReset();
   });
 
   it("允许白名单用户发布日志并写入审计记录", async () => {
@@ -223,6 +232,8 @@ describe("admin log routes", () => {
     expect(db.state.logs[0]?.title).toBe("首条日志");
     expect(db.state.activityLogs).toHaveLength(1);
     expect(db.state.activityLogs[0]?.action).toBe("create");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/log");
   });
 
   it("拒绝未授权的日志发布请求", async () => {
@@ -338,6 +349,8 @@ describe("admin log routes", () => {
     expect(db.state.logs[0]?.title).toBe("新标题");
     expect(db.state.logs[0]?.is_pinned).toBe(1);
     expect(db.state.activityLogs.at(-1)?.action).toBe("update");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/log");
   });
 
   it("允许管理员删除日志", async () => {
@@ -372,5 +385,7 @@ describe("admin log routes", () => {
     expect(response.status).toBe(200);
     expect(db.state.logs).toHaveLength(0);
     expect(db.state.activityLogs.at(-1)?.action).toBe("delete");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/log");
   });
 });

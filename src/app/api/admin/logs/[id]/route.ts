@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { requireAdminIdentity } from "@/lib/auth/admin-access";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
@@ -60,6 +61,11 @@ function createErrorResponse(error: unknown): Response {
   return Response.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
 }
 
+function revalidatePublicLogPages(): void {
+  revalidatePath("/");
+  revalidatePath("/log");
+}
+
 /**
  * 中文注释：更新日志会直接覆盖前台公开内容，不经过草稿阶段。
  * 使用示例：
@@ -95,6 +101,7 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Re
       operatorEmail: identity.email,
       payloadSnapshot: updated,
     });
+    revalidatePublicLogPages();
 
     return Response.json({ ok: true, item: updated }, { status: 200 });
   } catch (error) {
@@ -133,6 +140,7 @@ export async function DELETE(request: Request, context: RouteContext): Promise<R
       operatorEmail: identity.email,
       payloadSnapshot: deleted,
     });
+    revalidatePublicLogPages();
 
     return Response.json({ ok: true, item: deleted }, { status: 200 });
   } catch (error) {
