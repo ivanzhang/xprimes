@@ -4,8 +4,8 @@ import RootLayout from "@/app/layout";
 import HomePage from "@/app/page";
 
 describe("HomePage", () => {
-  it("显示带语义标识的首页标题和联系邮箱", () => {
-    render(<HomePage />);
+  it("显示带语义标识的首页标题和联系邮箱", async () => {
+    render(await HomePage());
 
     expect(screen.getByRole("main")).toHaveAttribute("aria-labelledby", "home-title");
     expect(screen.getByRole("heading", { name: "XPrimes" })).toHaveAttribute("id", "home-title");
@@ -17,10 +17,11 @@ describe("HomePage", () => {
     ).toHaveAttribute("href", "mailto:amy@xprimes.cn");
   });
 
-  it("根布局输出最小站点标识", () => {
+  it("根布局输出最小站点标识", async () => {
+    const page = await HomePage();
     const markup = renderToStaticMarkup(
       <RootLayout>
-        <HomePage />
+        {page}
       </RootLayout>,
     );
 

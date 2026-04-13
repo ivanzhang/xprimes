@@ -108,7 +108,7 @@ describe("public content", () => {
     expect(reviewPageRevalidate).toBe(60);
   });
 
-  it("首页展示项目定位、快速入口与联系邮箱", () => {
+  it("首页展示项目定位、快速入口与联系邮箱", async () => {
     render(await HomePage());
 
     expect(screen.getByRole("heading", { name: "XPrimes" })).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe("public content", () => {
     );
   });
 
-  it("公开页面展示论文空态、日志回退内容与 Review Protocol", () => {
+  it("公开页面展示论文空态、日志回退内容与 Review Protocol", async () => {
     render(await PapersPage());
     expect(screen.getByText("尚无公开版本")).toBeInTheDocument();
 
