@@ -112,7 +112,9 @@ describe("POST /api/admin/papers/upload", () => {
       headers: {
         "cf-access-authenticated-user-email": "amy@xprimes.cn",
       },
-      body: formData,
+    });
+    Object.defineProperty(request, "formData", {
+      value: async () => formData,
     });
 
     const response = await POST(request);
@@ -137,7 +139,9 @@ describe("POST /api/admin/papers/upload", () => {
       headers: {
         "cf-access-authenticated-user-email": "amy@xprimes.cn",
       },
-      body: formData,
+    });
+    Object.defineProperty(request, "formData", {
+      value: async () => formData,
     });
 
     const response = await POST(request);
@@ -158,7 +162,9 @@ describe("POST /api/admin/papers/upload", () => {
       headers: {
         "cf-access-authenticated-user-email": "amy@xprimes.cn",
       },
-      body: formData,
+    });
+    Object.defineProperty(request, "formData", {
+      value: async () => formData,
     });
 
     const response = await POST(request);

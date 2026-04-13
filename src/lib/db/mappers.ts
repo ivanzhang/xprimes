@@ -33,6 +33,14 @@ export interface PublicPaperItem {
   authorEmail: string;
 }
 
+export interface AdminPaperItem extends PublicPaperItem {
+  status: "draft" | "published";
+  pdfSize: number;
+  createdAt: string;
+  updatedAt: string;
+  updatedAtLabel: string;
+}
+
 export interface PublicReviewItem {
   id: string;
   code: string;
@@ -118,6 +126,27 @@ export function mapPaperRowToPublicItem(row: PaperRow): PublicPaperItem {
     downloadUrl: `/${row.pdf_key.replace(/^\/+/, "")}`,
     pdfFilename: row.pdf_filename,
     authorEmail: row.author_email,
+  };
+}
+
+/**
+ * 中文注释：后台论文列表额外带出状态、文件大小和更新时间，方便管理员识别草稿与已发布版本。
+ * 使用示例：
+ * ```ts
+ * const paper = mapPaperRowToAdminItem(row);
+ * console.log(paper.status);
+ * ```
+ */
+export function mapPaperRowToAdminItem(row: PaperRow): AdminPaperItem {
+  const publicItem = mapPaperRowToPublicItem(row);
+
+  return {
+    ...publicItem,
+    status: row.status,
+    pdfSize: row.pdf_size,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    updatedAtLabel: formatDateLabel(row.updated_at),
   };
 }
 
