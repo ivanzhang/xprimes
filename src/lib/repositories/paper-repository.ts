@@ -173,6 +173,21 @@ export async function createPaper(
  * const paper = await updatePaper(db, "paper-id", input);
  * ```
  */
+export async function deletePaper(
+  db: D1Database,
+  id: string,
+): Promise<PaperRow | null> {
+  const existing = await getPaperRowById(db, id);
+
+  if (!existing) {
+    return null;
+  }
+
+  await db.prepare("DELETE FROM papers WHERE id = ?").bind(id).run();
+
+  return existing;
+}
+
 export async function updatePaper(
   db: D1Database,
   id: string,

@@ -1,0 +1,68 @@
+import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
+import { requireAdminIdentity } from "@/lib/auth/admin-access";
+import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
+import { recordActivity } from "@/lib/repositories/activity-repository";
+import { createReviewItem } from "@/lib/repositories/review-repository";
+import { reviewInputSchema } from "@/lib/validators/review";
+
+function createErrorResponse(error: unknown): Response {
+  if (error instanceof ZodError) {
+    return Response.json(
+      { ok: false, error: "INVALID_REVIEW_INPUT", issues: error.flatten() },
+      { status: 400 },
+    );
+  }
+
+  if (error instanceof SyntaxError) {
+    return Response.json({ ok: false, error: "INVALID_JSON" }, { status: 400 });
+  }
+
+  if (error instanceof Error) {
+    if (error.message === "UNAUTHORIZED_ADMIN") {
+      return Response.json({ ok: false, error: error.message }, { status: 401 });
+    }
+
+    if (
+      error.message === "CLOUDFLARE_RUNTIME_UNAVAILABLE" ||
+      error.message === "CLOUDFLARE_DB_UNAVAILABLE"
+    ) {
+      return Response.json({ ok: false, error: error.message }, { status: 503 });
+    }
+  }
+
+  return Response.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
+}
+
+function revalidatePublicReviewPages(): void {
+  revalidatePath("/");
+  revalidatePath("/review");
+}
+
+export async function POST(request: Request): Promise<Response> {
+  try {
+    const identity = requireAdminIdentity(request);
+    const payload = await request.json();
+    const input = reviewInputSchema.parse(payload);
+    const { db } = await requireCloudflareRuntimeContext();
+
+    if (!db) {
+      throw new Error("CLOUDFLARE_DB_UNAVAILABLE");
+    }
+
+    const created = await createReviewItem(db, input, identity.email);
+
+    await recordActivity(db, {
+      entityType: "review_item",
+      entityId: created.id,
+      action: "create",
+      operatorEmail: identity.email,
+      payloadSnapshot: created,
+    });
+    revalidatePublicReviewPages();
+
+    return Response.json({ ok: true, item: created }, { status: 201 });
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+}

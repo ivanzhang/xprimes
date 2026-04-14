@@ -10,5 +10,18 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  // 中文注释：后续如需扩展，可继续添加 vars、d1_databases、r2_buckets 等绑定。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "xprimes-db",
+      "database_id": "TODO_REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "xprimes-papers"
+    }
+  ]
 }
