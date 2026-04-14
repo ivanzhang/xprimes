@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { getAdminFromSession } from "@/lib/auth/admin-access";
+import "./admin.css";
 
 export const metadata: Metadata = {
   title: "XPrimes Admin",
