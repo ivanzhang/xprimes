@@ -4,131 +4,160 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminPaperItem } from "@/lib/db/mappers";
 import { PaperForm } from "@/components/admin/paper-form";
+import { Modal } from "@/components/admin/modal";
+import { ConfirmDelete } from "@/components/admin/confirm-delete";
 
 interface PaperTableProps {
   papers: AdminPaperItem[];
 }
 
-interface ApiErrorPayload {
-  error?: string;
-}
-
-function getDeleteErrorMessage(errorCode?: string): string {
-  switch (errorCode) {
-    case "UNAUTHORIZED_ADMIN":
-      return "当前登录身份未通过后台白名单校验。";
-    case "PAPER_NOT_FOUND":
-      return "目标论文不存在，可能已被删除。";
-    default:
-      return "删除失败，请稍后重试。";
-  }
-}
-
 export function PaperTable({ papers }: PaperTableProps) {
   const router = useRouter();
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [editingPaper, setEditingPaper] = useState<AdminPaperItem | null>(null);
+  const [deletingPaper, setDeletingPaper] = useState<AdminPaperItem | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  async function handleDelete(id: string) {
-    const shouldContinue =
-      typeof window === "undefined" ? true : window.confirm("确认删除这篇论文吗？");
-
-    if (!shouldContinue) return;
-
-    setPendingDeleteId(id);
-    setFeedback(null);
-
+  async function handleToggleStatus(paper: AdminPaperItem) {
+    setTogglingId(paper.id);
+    const newStatus = paper.status === "published" ? "draft" : "published";
     try {
-      const response = await fetch(`/api/admin/papers/${id}`, { method: "DELETE" });
-      const payload = (await response.json().catch(() => null)) as ApiErrorPayload | null;
-
-      if (!response.ok) {
-        setFeedback(getDeleteErrorMessage(payload?.error));
-        return;
+      const res = await fetch(`/api/admin/papers/${paper.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          version: paper.version,
+          titleZh: paper.title,
+          titleEn: paper.subtitle,
+          abstractZh: paper.abstract,
+          abstractEn: paper.abstractEn ?? "",
+          status: newStatus,
+          pdfKey: paper.downloadUrl,
+          pdfFilename: paper.pdfFilename,
+          pdfSize: paper.pdfSize,
+        }),
+      });
+      if (res.ok) {
+        setFeedback(`${paper.title} 已${newStatus === "published" ? "上架" : "下架"}。`);
+        router.refresh();
       }
-
-      setFeedback("论文已删除。");
-      router.refresh();
     } finally {
-      setPendingDeleteId(null);
+      setTogglingId(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deletingPaper) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/admin/papers/${deletingPaper.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setFeedback(`论文已移入回收站。`);
+        setDeletingPaper(null);
+        router.refresh();
+      }
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
   if (papers.length === 0) {
     return (
-      <section aria-labelledby="admin-paper-table-title">
-        <h3 id="admin-paper-table-title">论文列表</h3>
-        <p>当前还没有论文记录，先通过上方表单创建第一个版本。</p>
+      <section>
+        <h3>论文列表</h3>
+        <p style={{ color: "var(--color-body)" }}>当前还没有论文记录。</p>
       </section>
     );
   }
 
   return (
-    <section aria-labelledby="admin-paper-table-title">
-      <h3 id="admin-paper-table-title">论文列表</h3>
+    <section>
+      <h3>论文列表（{papers.length}）</h3>
       {feedback ? <p role="status">{feedback}</p> : null}
 
       <table>
         <thead>
           <tr>
-            <th scope="col">版本</th>
-            <th scope="col">标题</th>
-            <th scope="col">状态</th>
-            <th scope="col">发布时间</th>
-            <th scope="col">更新</th>
-            <th scope="col">操作</th>
+            <th>版本</th>
+            <th>标题</th>
+            <th>状态</th>
+            <th>发布时间</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
           {papers.map((paper) => (
             <tr key={paper.id}>
-              <td>{paper.version}</td>
+              <td><code style={{ fontSize: "0.75rem" }}>{paper.version}</code></td>
+              <td><strong>{paper.title}</strong></td>
               <td>
-                <strong>{paper.title}</strong>
-                {paper.subtitle ? <p>{paper.subtitle}</p> : null}
+                <span className={`badge ${paper.status === "published" ? "badge-success" : "badge-draft"}`}>
+                  {paper.status === "published" ? "已上架" : "已下架"}
+                </span>
               </td>
-              <td>{paper.status === "published" ? "已发布" : "草稿"}</td>
               <td>{paper.publishDateLabel}</td>
-              <td>
-                <time dateTime={paper.updatedAt}>{paper.updatedAtLabel}</time>
-              </td>
-              <td>
-                <details>
-                  <summary>编辑</summary>
-                  <PaperForm
-                    mode="edit"
-                    paperId={paper.id}
-                    submitLabel="保存更新"
-                    initialValue={{
-                      version: paper.version,
-                      titleZh: paper.title,
-                      titleEn: paper.subtitle,
-                      abstractZh: paper.abstract,
-                      abstractEn: paper.abstractEn ?? "",
-                      status: paper.status,
-                      pdfKey: paper.downloadUrl,
-                      pdfFilename: paper.pdfFilename,
-                      pdfSize: paper.pdfSize,
-                    }}
-                    onSuccess={() => {
-                      setFeedback(`论文 ${paper.version} 已更新。`);
-                    }}
-                  />
-                </details>
+              <td style={{ whiteSpace: "nowrap" }}>
                 <button
                   type="button"
-                  disabled={pendingDeleteId === paper.id}
-                  onClick={() => {
-                    void handleDelete(paper.id);
+                  onClick={() => handleToggleStatus(paper)}
+                  disabled={togglingId === paper.id}
+                  style={{
+                    background: paper.status === "published" ? "rgba(234,34,97,0.06)" : "rgba(21,190,83,0.08)",
+                    color: paper.status === "published" ? "var(--color-ruby)" : "#108c3d",
+                    border: `1px solid ${paper.status === "published" ? "rgba(234,34,97,0.2)" : "rgba(21,190,83,0.3)"}`,
+                    padding: "4px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.75rem",
+                    cursor: "pointer", fontFamily: "var(--font-sans)",
                   }}
                 >
-                  {pendingDeleteId === paper.id ? "删除中..." : "删除"}
+                  {togglingId === paper.id ? "..." : paper.status === "published" ? "下架" : "上架"}
+                </button>
+                <button type="button" onClick={() => setEditingPaper(paper)}
+                  style={{ marginLeft: 6, background: "var(--color-purple-surface)", color: "var(--color-purple)", border: "1px solid var(--color-border-purple)", padding: "4px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  编辑
+                </button>
+                <button type="button" onClick={() => setDeletingPaper(paper)}
+                  style={{ marginLeft: 6, background: "transparent", color: "var(--color-ruby)", border: "1px solid rgba(234,34,97,0.2)", padding: "4px 12px", borderRadius: "var(--radius-sm)", fontSize: "0.75rem", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                  删除
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <Modal open={!!editingPaper} onClose={() => setEditingPaper(null)} title="编辑论文">
+        {editingPaper ? (
+          <PaperForm
+            mode="edit"
+            paperId={editingPaper.id}
+            submitLabel="保存更新"
+            initialValue={{
+              version: editingPaper.version,
+              titleZh: editingPaper.title,
+              titleEn: editingPaper.subtitle,
+              abstractZh: editingPaper.abstract,
+              abstractEn: editingPaper.abstractEn ?? "",
+              status: editingPaper.status,
+              pdfKey: editingPaper.downloadUrl,
+              pdfFilename: editingPaper.pdfFilename,
+              pdfSize: editingPaper.pdfSize,
+            }}
+            onSuccess={() => { setEditingPaper(null); setFeedback("论文已更新。"); }}
+          />
+        ) : null}
+      </Modal>
+
+      <Modal open={!!deletingPaper} onClose={() => setDeletingPaper(null)} title="确认删除">
+        {deletingPaper ? (
+          <ConfirmDelete
+            itemName={deletingPaper.title}
+            onConfirm={handleDelete}
+            onCancel={() => setDeletingPaper(null)}
+            loading={deleteLoading}
+          />
+        ) : null}
+      </Modal>
     </section>
   );
 }

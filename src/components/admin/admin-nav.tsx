@@ -26,6 +26,11 @@ export const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
     label: "反质疑条目管理",
     description: "维护结构化回应条目与状态。",
   },
+  {
+    href: "/admin/comments",
+    label: "评论管理",
+    description: "查看和管理用户评论，隐藏/显示评论。",
+  },
 ] as const;
 
 interface AdminNavProps {

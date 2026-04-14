@@ -34,7 +34,7 @@ export async function GET(request: Request): Promise<Response> {
         `SELECT c.id, c.page_key, c.user_id, c.content, c.created_at,
                 u.name AS user_name, u.avatar_url AS user_avatar, u.provider AS user_provider
          FROM comments c JOIN users u ON c.user_id = u.id
-         WHERE c.page_key = ?
+         WHERE c.page_key = ? AND c.is_hidden = 0
          ORDER BY c.created_at ASC
          LIMIT 200`,
       )

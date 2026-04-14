@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
 import { verifyEmailCode } from "@/lib/auth/email-code";
-import { findOrCreateUser, createSession } from "@/lib/auth/session";
+import { findOrCreateUser, createSession, recordAdminLogin } from "@/lib/auth/session";
+import { isAllowedAdminEmail } from "@/lib/auth/admin-access";
 
 const verifySchema = z.object({
   email: z.string().email(),
@@ -30,6 +31,10 @@ export async function POST(request: Request): Promise<Response> {
     });
 
     await createSession(db, userId);
+
+    if (isAllowedAdminEmail(email)) {
+      await recordAdminLogin(db, userId, email);
+    }
 
     return Response.json({ ok: true });
   } catch (error) {

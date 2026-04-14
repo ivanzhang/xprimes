@@ -49,7 +49,7 @@ function mapRowToAdminItem(row: ReviewItemRow): AdminReviewItem {
 
 async function listReviewRowsFromDb(db: D1Database): Promise<ReviewItemRow[]> {
   const result = await db
-    .prepare(`${REVIEW_SELECT_SQL} ORDER BY updated_at DESC`)
+    .prepare(`${REVIEW_SELECT_SQL} WHERE deleted_at IS NULL ORDER BY updated_at DESC`)
     .all<ReviewItemRow>();
 
   return result.results ?? [];
@@ -192,7 +192,7 @@ export async function deleteReviewItem(
     return null;
   }
 
-  await db.prepare("DELETE FROM review_items WHERE id = ?").bind(id).run();
+  await db.prepare("UPDATE review_items SET deleted_at = ? WHERE id = ?").bind(new Date().toISOString(), id).run();
 
   return existing;
 }

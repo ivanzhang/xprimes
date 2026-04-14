@@ -17,6 +17,13 @@ export function generateToken(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+export async function recordAdminLogin(db: D1Database, userId: string, email: string): Promise<void> {
+  await db
+    .prepare("INSERT INTO admin_logins (id, user_id, email, created_at) VALUES (?, ?, ?, ?)")
+    .bind(crypto.randomUUID(), userId, email, new Date().toISOString())
+    .run();
+}
+
 export async function createSession(
   db: D1Database,
   userId: string,

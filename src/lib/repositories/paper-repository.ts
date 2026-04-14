@@ -41,7 +41,7 @@ function sortPaperRows(left: PaperRow, right: PaperRow): number {
 
 async function listPaperRowsFromDb(db: D1Database): Promise<PaperRow[]> {
   const result = await db
-    .prepare(`${PAPER_SELECT_SQL} ORDER BY publish_date DESC, version DESC, updated_at DESC`)
+    .prepare(`${PAPER_SELECT_SQL} WHERE deleted_at IS NULL ORDER BY publish_date DESC, version DESC, updated_at DESC`)
     .all<PaperRow>();
 
   return result.results ?? [];
@@ -187,7 +187,7 @@ export async function deletePaper(
     return null;
   }
 
-  await db.prepare("DELETE FROM papers WHERE id = ?").bind(id).run();
+  await db.prepare("UPDATE papers SET deleted_at = ? WHERE id = ?").bind(new Date().toISOString(), id).run();
 
   return existing;
 }

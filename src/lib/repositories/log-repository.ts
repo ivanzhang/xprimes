@@ -47,7 +47,7 @@ function toNullableExcerpt(value: string): string | null {
 
 async function listLogRowsFromDb(db: D1Database): Promise<LogRow[]> {
   const result = await db
-    .prepare(`${LOG_SELECT_SQL} ORDER BY is_pinned DESC, published_at DESC, updated_at DESC`)
+    .prepare(`${LOG_SELECT_SQL} WHERE deleted_at IS NULL ORDER BY is_pinned DESC, published_at DESC, updated_at DESC`)
     .all<LogRow>();
 
   return (result.results ?? []).map(normalizeLogRow);
@@ -228,6 +228,6 @@ export async function deleteLog(db: D1Database, id: string): Promise<LogRow | nu
     return null;
   }
 
-  await db.prepare("DELETE FROM logs WHERE id = ?").bind(id).run();
+  await db.prepare("UPDATE logs SET deleted_at = ? WHERE id = ?").bind(new Date().toISOString(), id).run();
   return existing;
 }
