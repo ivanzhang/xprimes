@@ -112,17 +112,12 @@ function LoginPanel() {
       </p>
 
       <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", flexWrap: "wrap", marginBottom: "var(--space-md)" }}>
-        <a href="/api/auth/github" className="btn btn-ghost" style={{ gap: 6 }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-          GitHub 登录
-        </a>
-        <a href="/api/auth/google" className="btn btn-ghost" style={{ gap: 6 }}>
-          <svg width="16" height="16" viewBox="0 0 16 16"><path fill="#4285F4" d="M15.68 8.18c0-.57-.05-1.11-.15-1.64H8v3.1h4.3a3.68 3.68 0 01-1.6 2.41v2h2.59c1.51-1.4 2.39-3.45 2.39-5.87z"/><path fill="#34A853" d="M8 16c2.16 0 3.97-.72 5.29-1.94l-2.59-2a5.07 5.07 0 01-7.56-2.65H.55v2.06A8 8 0 008 16z"/><path fill="#FBBC05" d="M3.14 9.41a4.8 4.8 0 010-2.82V4.53H.55a8 8 0 000 6.94l2.59-2.06z"/><path fill="#EA4335" d="M8 3.18c1.22 0 2.31.42 3.17 1.24l2.38-2.38A8 8 0 00.55 4.53l2.59 2.06A4.77 4.77 0 018 3.18z"/></svg>
-          Google 登录
-        </a>
+        {/* GitHub 和 Google 登录待配置 OAuth 凭据后启用 */}
+        {/* <a href="/api/auth/github" className="btn btn-ghost">GitHub 登录</a> */}
+        {/* <a href="/api/auth/google" className="btn btn-ghost">Google 登录</a> */}
         <button
           type="button"
-          className="btn btn-ghost"
+          className="btn btn-primary"
           onClick={() => setShowEmail((v) => !v)}
         >
           ✉ 邮箱登录
@@ -296,7 +291,7 @@ export function Comments({ pageKey }: CommentsProps) {
       <p className="section-eyebrow">DISCUSSION</p>
       <h2 className="section-title">评论与讨论</h2>
       <p className="section-desc">
-        支持 GitHub、Google 或邮箱登录。欢迎数学讨论、勘误建议与结构化反馈。
+        使用邮箱登录即可评论。欢迎数学讨论、勘误建议与结构化反馈。
       </p>
 
       {/* Comment list */}
