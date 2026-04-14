@@ -21,7 +21,7 @@ export default async function LogPage() {
         <LogList logs={logs} />
       </section>
 
-      <Comments term="log" />
+      <Comments pageKey="log" />
     </main>
   );
 }

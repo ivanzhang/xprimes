@@ -68,7 +68,7 @@ Comment: 具体且清晰的数学论述
         </div>
       </section>
 
-      <Comments term="review" />
+      <Comments pageKey="review" />
     </main>
   );
 }

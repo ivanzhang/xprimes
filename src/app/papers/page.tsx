@@ -53,7 +53,7 @@ export default function PapersPage() {
         </section>
       ))}
 
-      <Comments term="papers" />
+      <Comments pageKey="papers" />
     </main>
   );
 }
