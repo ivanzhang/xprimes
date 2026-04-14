@@ -71,7 +71,11 @@ export async function listPublishedReviewSectionsFromRuntime(): Promise<PublicRe
     return listPublishedReviewSections();
   }
 
-  return listPublishedReviewSections(await listReviewRowsFromDb(runtime.db));
+  try {
+    return listPublishedReviewSections(await listReviewRowsFromDb(runtime.db));
+  } catch {
+    return listPublishedReviewSections();
+  }
 }
 
 export async function listAdminReviewItemsFromRuntime(): Promise<AdminReviewCollection> {

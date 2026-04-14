@@ -21,7 +21,7 @@
     {
       "binding": "DB",
       "database_name": "xprimes-db",
-      "database_id": "TODO_REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "e3d251e5-d5ff-4eca-88d7-5857480c4093",
       "migrations_dir": "migrations"
     }
   ],

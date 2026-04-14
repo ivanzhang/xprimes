@@ -80,7 +80,11 @@ export async function listPublishedPapersFromRuntime(): Promise<PublicPaperItem[
     return listPublishedPapers();
   }
 
-  return listPublishedPapers(await listPaperRowsFromDb(runtime.db));
+  try {
+    return listPublishedPapers(await listPaperRowsFromDb(runtime.db));
+  } catch {
+    return listPublishedPapers();
+  }
 }
 
 /**

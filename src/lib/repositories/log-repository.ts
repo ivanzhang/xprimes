@@ -85,7 +85,11 @@ export async function listPublicLogsFromRuntime(): Promise<PublicLogItem[]> {
     return listPublicLogs();
   }
 
-  return listPublicLogs(await listLogRowsFromDb(runtime.db));
+  try {
+    return listPublicLogs(await listLogRowsFromDb(runtime.db));
+  } catch {
+    return listPublicLogs();
+  }
 }
 
 /**
