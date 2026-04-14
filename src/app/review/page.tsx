@@ -1,65 +1,74 @@
-import { ContactCard } from "@/components/site/contact-card";
 import { ReviewList } from "@/components/site/review-list";
-import { SectionHeading } from "@/components/site/section-heading";
+import { Comments } from "@/components/site/comments";
 import { listPublishedReviewSections } from "@/lib/repositories/review-repository";
 
-// 中文注释：反质疑页面同样按分钟级刷新，便于后续后台发布后及时生效。
 export const revalidate = 60;
-
-const REVIEW_PROTOCOL = [
-  "Each critique should reference a specific definition, lemma, or theorem.",
-  "Ambiguous or non-specific objections will not be tracked.",
-  "All responses will point to explicit sections or revisions.",
-];
 
 export default function ReviewPage() {
   const sections = listPublishedReviewSections();
 
   return (
-    <main aria-labelledby="review-title">
-      <section>
-        <h1 id="review-title">反质疑</h1>
-        <p>本页用于结构化记录问题、质疑与回应尝试；目标是降低讨论成本，而不是制造对抗语气。</p>
-      </section>
-
-      <section>
-        <SectionHeading
-          eyebrow="REVIEW"
-          title="Review & Discussion"
-          description="欢迎逐条验证与指出问题，所有公开条目都应具备编号、定位与可追溯说明。"
-        />
-        <p>
-          All feedback is welcome, but each item should remain specific, referenceable and
-          suitable for archival follow-up.
+    <main>
+      <section className="hero" style={{ paddingBottom: "var(--space-xl)" }}>
+        <p className="hero-eyebrow">Review &amp; Discussion</p>
+        <h1>审读与反馈</h1>
+        <p className="hero-subtitle">
+          本页用于结构化记录问题、质疑与回应。目标是降低讨论成本，推动严谨验证。
         </p>
       </section>
 
-      <section aria-labelledby="review-protocol-title">
-        <h2 id="review-protocol-title">Review Protocol</h2>
-        <ul>
-          {REVIEW_PROTOCOL.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+      <section className="section">
+        <p className="section-eyebrow">PROTOCOL</p>
+        <h2 className="section-title">审读协议</h2>
+        <div className="card-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+          <div className="card">
+            <h3 className="card-title">引用定位</h3>
+            <p className="card-body">
+              每条质疑应引用具体的定义、引理或定理，确保讨论可追溯。
+            </p>
+          </div>
+          <div className="card">
+            <h3 className="card-title">具体明确</h3>
+            <p className="card-body">
+              模糊或非特定的反对意见不会被追踪，请提供可验证的数学论据。
+            </p>
+          </div>
+          <div className="card">
+            <h3 className="card-title">结构化回应</h3>
+            <p className="card-body">
+              所有回应将指向具体章节或修订版本，确保讨论的持续性。
+            </p>
+          </div>
+        </div>
       </section>
 
-      <section>
+      <section className="section">
         <ReviewList sections={sections} />
       </section>
 
-      <section aria-labelledby="submit-feedback-title">
-        <h2 id="submit-feedback-title">Submit Feedback</h2>
-        <p>如需提交结构化反馈，请通过邮件提供引用位置、问题描述与必要上下文。</p>
-        <pre>{`Subject: XPrimes Review - [Short Title]
+      <section className="section">
+        <p className="section-eyebrow">SUBMIT</p>
+        <h2 className="section-title">提交反馈</h2>
+        <div className="contact-card">
+          <p>如需提交结构化反馈，请通过邮件提供引用位置、问题描述与必要上下文。</p>
+          <pre style={{
+            background: "rgba(83, 58, 253, 0.05)",
+            padding: "var(--space-md)",
+            borderRadius: "var(--radius-md)",
+            fontSize: "0.8125rem",
+            marginTop: "var(--space-md)",
+            overflow: "auto",
+            fontFamily: "var(--font-mono)",
+          }}>{`Subject: XPrimes Review - [简短标题]
 
-Reference:
-Definition / Lemma / Theorem
+Reference: 定义 / 引理 / 定理编号
+Comment: 具体且清晰的数学论述
 
-Comment:
-Clear and specific statement`}</pre>
+发送至: amy@xprimes.cn`}</pre>
+        </div>
       </section>
 
-      <ContactCard title="反馈邮箱" description="结构化质疑、版本勘误与补充材料可发送至以下邮箱。" />
+      <Comments term="review" />
     </main>
   );
 }

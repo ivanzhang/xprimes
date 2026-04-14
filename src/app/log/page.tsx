@@ -1,28 +1,27 @@
 import { LogList } from "@/components/site/log-list";
-import { SectionHeading } from "@/components/site/section-heading";
+import { Comments } from "@/components/site/comments";
 import { listPublicLogsFromRuntime } from "@/lib/repositories/log-repository";
 
-// 中文注释：动态日志需要较快反映新发布内容，因此使用显式 revalidate。
 export const revalidate = 60;
 
 export default async function LogPage() {
   const logs = await listPublicLogsFromRuntime();
 
   return (
-    <main aria-labelledby="log-title">
-      <section>
-        <h1 id="log-title">动态日志</h1>
-        <p>按时间记录研究推进、术语调整、版本准备与公开说明，优先强调可追溯性。</p>
+    <main>
+      <section className="hero" style={{ paddingBottom: "var(--space-xl)" }}>
+        <p className="hero-eyebrow">Timeline</p>
+        <h1>动态日志</h1>
+        <p className="hero-subtitle">
+          按时间记录研究推进、版本准备与公开说明，保持研究过程的完整可追溯性。
+        </p>
       </section>
 
-      <section>
-        <SectionHeading
-          eyebrow="TIMELINE"
-          title="公开记录"
-          description="日志默认按置顶与发布时间排序，便于读者快速把握站点进展。"
-        />
+      <section className="section">
         <LogList logs={logs} />
       </section>
+
+      <Comments term="log" />
     </main>
   );
 }
