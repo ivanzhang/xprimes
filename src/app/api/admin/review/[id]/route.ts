@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
-import { requireAdminIdentity } from "@/lib/auth/admin-access";
+import { requireAdminSession } from "@/lib/auth/admin-access";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
 import { recordActivity } from "@/lib/repositories/activity-repository";
 import { updateReviewItem, deleteReviewItem } from "@/lib/repositories/review-repository";
@@ -64,7 +64,7 @@ function revalidatePublicReviewPages(): void {
 
 export async function PATCH(request: Request, context: RouteContext): Promise<Response> {
   try {
-    const identity = requireAdminIdentity(request);
+    const identity = await requireAdminSession();
     const reviewId = await resolveReviewId(context);
     const payload = await request.json();
     const input = reviewInputSchema.parse(payload);
@@ -97,7 +97,7 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Re
 
 export async function DELETE(request: Request, context: RouteContext): Promise<Response> {
   try {
-    const identity = requireAdminIdentity(request);
+    const identity = await requireAdminSession();
     const reviewId = await resolveReviewId(context);
     const { db } = await requireCloudflareRuntimeContext();
 

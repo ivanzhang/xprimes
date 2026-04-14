@@ -1,4 +1,4 @@
-import { requireAdminIdentity } from "@/lib/auth/admin-access";
+import { requireAdminSession } from "@/lib/auth/admin-access";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
 import { uploadPaperPdf } from "@/lib/r2/paper-storage";
 
@@ -38,7 +38,7 @@ function createErrorResponse(error: unknown): Response {
  */
 export async function POST(request: Request): Promise<Response> {
   try {
-    const identity = requireAdminIdentity(request);
+    const identity = await requireAdminSession();
     const runtime = await requireCloudflareRuntimeContext();
     const r2 = runtime.r2;
 

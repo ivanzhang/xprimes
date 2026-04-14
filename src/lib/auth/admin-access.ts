@@ -1,134 +1,65 @@
-const ACCESS_EMAIL_HEADER = "cf-access-authenticated-user-email";
+import { tryGetCloudflareRuntimeContext } from "@/lib/cloudflare/context";
+import { getSessionUser, type SessionUser } from "@/lib/auth/session";
 
-// 中文注释：后台固定管理员邮箱白名单。
 export const ADMIN_ALLOWLIST = ["amy@xprimes.cn", "yiyi@xprimes.cn"] as const;
 
 export type AdminEmail = (typeof ADMIN_ALLOWLIST)[number];
 
 export interface AdminIdentity {
   email: AdminEmail;
+  userId: string;
+  name: string | null;
 }
 
-export interface HeadersLike {
-  get(name: string): string | null;
-}
-
-// 中文注释：使用 Set 提升命中判断效率，避免每次线性遍历。
 const ADMIN_ALLOWLIST_SET = new Set<string>(ADMIN_ALLOWLIST);
 
 function normalizeEmail(email: string | null | undefined): string | null {
-  if (!email) {
-    return null;
-  }
-
+  if (!email) return null;
   const normalized = email.trim().toLowerCase();
   return normalized.length > 0 ? normalized : null;
 }
 
-/**
- * 中文注释：从任意兼容 Headers 的对象提取 Access 邮箱，便于在 Next `headers()` 场景复用。
- * 使用示例：
- * ```ts
- * const email = getAuthenticatedEmailFromHeaders(headers());
- * ```
- */
-export function getAuthenticatedEmailFromHeaders(headersLike: HeadersLike): string | null {
-  return normalizeEmail(headersLike.get(ACCESS_EMAIL_HEADER));
-}
-
-/**
- * 中文注释：从 Cloudflare Access 请求头提取并标准化邮箱。
- * 使用示例：
- * ```ts
- * const email = getAuthenticatedEmail(request);
- * if (email) console.log(email);
- * ```
- */
-export function getAuthenticatedEmail(request: Request): string | null {
-  return getAuthenticatedEmailFromHeaders(request.headers);
-}
-
-/**
- * 中文注释：主接口，判断邮箱是否属于后台白名单。
- * 使用示例：
- * ```ts
- * if (isAllowedAdminEmail("amy@xprimes.cn")) {
- *   console.log("允许访问后台");
- * }
- * ```
- */
 export function isAllowedAdminEmail(email: string | null | undefined): boolean {
   const normalized = normalizeEmail(email);
   return normalized !== null && ADMIN_ALLOWLIST_SET.has(normalized);
 }
 
-function getAllowedAdminEmail(email: string | null | undefined): AdminEmail | null {
-  const normalized = normalizeEmail(email);
-  if (!normalized || !ADMIN_ALLOWLIST_SET.has(normalized)) {
-    return null;
-  }
-
-  return normalized as AdminEmail;
+function sessionToAdmin(user: SessionUser): AdminIdentity | null {
+  const normalized = normalizeEmail(user.email);
+  if (!normalized || !ADMIN_ALLOWLIST_SET.has(normalized)) return null;
+  return { email: normalized as AdminEmail, userId: user.id, name: user.name };
 }
 
 /**
- * 中文注释：从请求头对象解析管理员身份，适合在 App Router Layout 中做服务端守卫。
- * 使用示例：
- * ```ts
- * const admin = getAdminIdentityFromHeaders(await headers());
- * ```
+ * Try to get admin identity from session cookie.
+ * Returns null if not logged in or not an admin email.
  */
-export function getAdminIdentityFromHeaders(headersLike: HeadersLike): AdminIdentity | null {
-  const email = getAllowedAdminEmail(getAuthenticatedEmailFromHeaders(headersLike));
-  if (!email) {
-    return null;
-  }
+export async function getAdminFromSession(): Promise<AdminIdentity | null> {
+  const runtime = await tryGetCloudflareRuntimeContext();
+  if (!runtime?.db) return null;
 
-  return {
-    email,
-  };
+  const user = await getSessionUser(runtime.db);
+  if (!user) return null;
+
+  return sessionToAdmin(user);
 }
 
 /**
- * 中文注释：主接口，从请求中解析管理员身份，非管理员返回 null。
- * 使用示例：
- * ```ts
- * const admin = getAdminIdentity(request);
- * if (!admin) return new Response("forbidden", { status: 403 });
- * ```
+ * Require admin identity; throws UNAUTHORIZED_ADMIN if not valid.
+ * Used by API routes — reads session from cookie.
  */
-export function getAdminIdentity(request: Request): AdminIdentity | null {
-  return getAdminIdentityFromHeaders(request.headers);
-}
-
-/**
- * 中文注释：严格解析管理员身份，可接收 Request 或 `headers()` 返回值。
- * 使用示例：
- * ```ts
- * const admin = requireAdminIdentity(await headers());
- * ```
- */
-export function requireAdminIdentity(requestOrHeadersLike: Request | HeadersLike): AdminIdentity {
-  const headersLike = requestOrHeadersLike instanceof Request
-    ? requestOrHeadersLike.headers
-    : requestOrHeadersLike;
-  const admin = getAdminIdentityFromHeaders(headersLike);
-
-  if (!admin) {
-    throw new Error("UNAUTHORIZED_ADMIN");
-  }
-
+export async function requireAdminSession(): Promise<AdminIdentity> {
+  const admin = await getAdminFromSession();
+  if (!admin) throw new Error("UNAUTHORIZED_ADMIN");
   return admin;
 }
 
 /**
- * 中文注释：严格模式，未通过白名单直接抛错，适合后台守卫。
- * 使用示例：
- * ```ts
- * const admin = requireAdmin(request);
- * console.log(`当前管理员: ${admin.email}`);
- * ```
+ * Legacy compat: require admin from request.
+ * Now reads session cookie instead of CF Access header.
  */
-export function requireAdmin(request: Request): AdminIdentity {
-  return requireAdminIdentity(request);
+export function requireAdminIdentity(_requestOrHeaders: unknown): AdminIdentity {
+  // This sync version can't read cookies in server components.
+  // Use requireAdminSession() (async) instead.
+  throw new Error("UNAUTHORIZED_ADMIN");
 }

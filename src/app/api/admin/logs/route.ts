@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
-import { requireAdminIdentity } from "@/lib/auth/admin-access";
+import { requireAdminSession } from "@/lib/auth/admin-access";
 import { requireCloudflareRuntimeContext } from "@/lib/cloudflare/context";
 import { recordActivity } from "@/lib/repositories/activity-repository";
 import { createLog } from "@/lib/repositories/log-repository";
@@ -61,7 +61,7 @@ function revalidatePublicLogPages(): void {
  */
 export async function POST(request: Request): Promise<Response> {
   try {
-    const identity = requireAdminIdentity(request);
+    const identity = await requireAdminSession();
     const payload = await request.json();
     const input = logInputSchema.parse(payload);
     const { db } = await requireCloudflareRuntimeContext();
